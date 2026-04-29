@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="御謙團隊安娜專屬財務導航系統，提供專業理財紀錄與夢想規劃工具。">
+
     <!-- iPhone 沉浸式設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -111,6 +116,11 @@
             box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
         }
 
+        .shield-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
         .level-progress-bg { background: #e2e8f0; height: 6px; border-radius: 10px; width: 100%; overflow: hidden; }
         .level-progress-fill { background: #0f172a; height: 100%; transition: width 0.5s ease-out; }
 
@@ -147,6 +157,9 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
+            <div class="shield-badge text-white px-2 py-1 rounded-full text-[10px] font-black flex items-center shadow-sm">
+                🛡️ <span id="shieldCount">0</span>
+            </div>
             <div class="streak-badge text-white px-2.5 py-1 rounded-full text-[10px] font-black flex items-center shadow-sm">
                 🔥 <span id="streakCount">0</span> 天
             </div>
@@ -177,6 +190,7 @@
                     <p class="text-[8px] text-white/30 text-right uppercase tracking-tighter">點擊卡片換一則</p>
                 </div>
 
+                <!-- 等級卡 -->
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-50 space-y-3">
                     <div class="flex justify-between items-end">
                         <div><p class="text-[10px] text-slate-400 font-black mb-1 uppercase">理財身份等級</p><h3 id="levelName" class="text-lg font-black text-slate-800">初心學員</h3></div>
@@ -247,6 +261,7 @@
                     <h2 class="text-2xl font-black text-slate-800">集點商城</h2>
                     <p class="text-slate-400 text-[10px] font-bold uppercase mt-1" id="mallDiscountInfo">計算折扣中...</p>
                 </div>
+                <!-- 護身符商品將會渲染在此 -->
                 <div class="grid grid-cols-2 gap-4" id="mallItems"></div>
                 <div class="mt-10 px-1">
                     <h3 class="text-xs font-bold text-slate-400 mb-4 px-1 uppercase tracking-widest">🎫 我的憑證票夾</h3>
@@ -264,7 +279,7 @@
                         <div class="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100 shadow-sm">資產多維配置</div>
                     </div>
                     <div class="bg-slate-900/5 p-5 rounded-3xl text-center italic text-[11px] text-slate-600 leading-relaxed font-bold">「人身保險業務員資格測驗合格」<br>為您創造可持續的財務安全感。</div>
-                    <button onclick="handleConsultClick(event)" class="block w-full btn-primary py-5 shadow-xl text-sm tracking-widest active:scale-95 transition-transform">預約安娜姨姨服務</button>
+                    <button onclick="handleConsultClick(event)" class="block w-full btn-primary py-5 shadow-xl text-sm tracking-widest active:scale-95 transition-transform">聯繫安娜姨姨</button>
                 </div>
                 <p class="px-6 text-center text-[9px] text-slate-300 font-bold italic leading-relaxed pb-10">御謙團隊合作夥伴。本系統僅供紀錄，專業建議由符合資格者提供。</p>
             </section>
@@ -273,7 +288,7 @@
             <section id="page-add" class="page space-y-6">
                 <h2 id="addPageTitle" class="text-2xl font-black text-slate-800 px-1">新增財務紀錄</h2>
                 <div class="bg-white p-7 rounded-[2.5rem] shadow-sm">
-                    <form id="transactionForm" class="space-y-6">
+                    <form id="transactionForm" class="space-y-6" autocomplete="off">
                         <input type="hidden" id="editId" value="">
                         <div class="flex bg-slate-100 p-1 rounded-2xl">
                             <button type="button" onclick="setType('expense')" id="btnExpense" class="flex-1 py-3 rounded-xl font-bold text-sm shadow-sm transition-all duration-200">支出</button>
@@ -308,9 +323,8 @@
     <script>
         // --- 核心變數 ---
         let chartInstance = null; let currentType = 'expense'; const CONSULTANT_PWD = '0000';
-        const DATA_KEY = 'yutrend_anna_clean_v25_data'; const STATS_KEY = 'yutrend_anna_clean_v25_stats';
+        const DATA_KEY = 'yutrend_anna_clean_v26_data'; const STATS_KEY = 'yutrend_anna_clean_v26_stats';
 
-        // 理財小知識資料庫
         const financialTips = [
             "記帳是了解金錢流向的第一步，看清開銷才能拿回生活主導權。",
             "理財黃金公式：收入減預計儲蓄等於支出。先存再花，紀律最重要。",
@@ -326,25 +340,25 @@
 
         function refreshTip() {
             const tipEl = document.getElementById('tipText');
-            if (tipEl) {
-                const randomTip = financialTips[Math.floor(Math.random() * financialTips.length)];
-                tipEl.innerText = randomTip;
-            }
+            if (tipEl) tipEl.innerText = financialTips[Math.floor(Math.random() * financialTips.length)];
         }
 
+        // --- 資料遷移與初始化 ---
         function migrateData() {
-            const oldKeys = ['yutrend_anna_final_v24_data', 'yutrend_anna_final_v23_data', 'yutrend_final_v21_data'];
+            const oldKeys = ['yutrend_anna_clean_v25_data', 'yutrend_anna_final_v24_data'];
             if (!localStorage.getItem(DATA_KEY)) { for (let k of oldKeys) { let d = localStorage.getItem(k); if (d) { localStorage.setItem(DATA_KEY, d); break; } } }
-            const oldStatsKeys = ['yutrend_anna_final_v24_stats', 'yutrend_anna_final_v23_stats', 'yutrend_final_v21_stats'];
+            const oldStatsKeys = ['yutrend_anna_clean_v25_stats', 'yutrend_anna_final_v24_stats'];
             if (!localStorage.getItem(STATS_KEY)) { for (let k of oldStatsKeys) { let s = localStorage.getItem(k); if (s) { localStorage.setItem(STATS_KEY, s); break; } } }
         }
         migrateData();
 
         let transactions = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
         let userStats = JSON.parse(localStorage.getItem(STATS_KEY)) || { 
-            points: 0, lastDaily: null, inventory: [], streak: 0, lastEntryDate: null, dreams: [], subscriptions: []
+            points: 0, lastDaily: null, inventory: [], streak: 0, lastEntryDate: null, dreams: [], subscriptions: [], streakShield: 0
         };
         
+        // 補齊可能缺失的欄位
+        if (userStats.streakShield === undefined) userStats.streakShield = 0;
         if (!userStats.dreams) userStats.dreams = [];
         if (!userStats.subscriptions) userStats.subscriptions = [];
 
@@ -354,11 +368,45 @@
         };
 
         const mallItems = [
-            { id: 1, name: '測試商品', price: 5, icon: '🧪' },
-            { id: 2, name: '精選咖啡', price: 50, icon: '☕' },
-            { id: 3, name: '理財規劃手冊', price: 100, icon: '📚' },
-            { id: 4, name: '1-ON-1 專業服務', price: 1000, icon: '💎' }
+            { id: 1, name: '連擊護身符', price: 30, icon: '🛡️', desc: '自動消耗以挽救斷掉的連擊紀錄' },
+            { id: 2, name: '精選咖啡', price: 50, icon: '☕', desc: '安娜請你喝一杯提神咖啡' },
+            { id: 3, name: '理財規劃手冊', price: 100, icon: '📚', desc: '御謙團隊專業實體規劃書' },
+            { id: 4, name: '1-ON-1 專業服務', price: 1000, icon: '💎', desc: '與安娜姨姨進行一小時諮詢' }
         ];
+
+        // --- 護身符邏輯 ---
+        function checkStreakExpiry() {
+            const today = new Date().toISOString().split('T')[0];
+            if (userStats.lastEntryDate) {
+                const last = new Date(userStats.lastEntryDate);
+                const current = new Date(today);
+                const diff = Math.floor((current - last) / (1000 * 60 * 60 * 24));
+                
+                if (diff > 1) {
+                    if (userStats.streakShield > 0) {
+                        userStats.streakShield--;
+                        // 將日期改為昨天，模擬昨天有記帳
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        userStats.lastEntryDate = yesterday.toISOString().split('T')[0];
+                        saveStats();
+                        showModalContent(`
+                            <div class="text-center space-y-5">
+                                <div class="text-6xl">🛡️</div>
+                                <h3 class="text-xl font-black">護身符發動！</h3>
+                                <p class="text-sm text-slate-500 font-bold px-4">
+                                    安娜姨姨發現您前幾天忘記記帳了，系統已自動消耗「護身符」為您接回 <b>${userStats.streak}</b> 天連擊紀錄！
+                                </p>
+                                <button onclick="closeModal()" class="w-full btn-primary py-4">太棒了，謝謝安娜</button>
+                            </div>
+                        `);
+                    } else {
+                        userStats.streak = 0;
+                        saveStats();
+                    }
+                }
+            }
+        }
 
         // --- 功能模組 ---
         function handleOutsideClick() { closeModal(); }
@@ -368,28 +416,64 @@
         function saveStats() { localStorage.setItem(STATS_KEY, JSON.stringify(userStats)); }
         function saveData() { localStorage.setItem(DATA_KEY, JSON.stringify(transactions)); }
 
-        function openAddSubModal() {
-            showModalContent(`
-                <div class="space-y-6">
-                    <h3 class="text-xl font-black text-center">新增定期訂閱</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="subName" placeholder="服務名稱" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
-                        <input type="number" id="subAmount" placeholder="每月金額" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
+        // --- 商城邏輯 ---
+        function renderMall() {
+            const lv = getLevelInfo(userStats.streak); const c = document.getElementById('mallItems'); const i = document.getElementById('mallDiscountInfo');
+            if(i) i.innerText = `會員等級：${lv.name} (${(lv.discount * 10).toFixed(1)} 折)`;
+            if(!c) return;
+            c.innerHTML = mallItems.map(item => {
+                const fp = Math.floor(item.price * lv.discount);
+                return `
+                <div class="bg-white p-5 rounded-3xl text-center space-y-3 shadow-sm border border-slate-50 active:scale-95 transition-transform">
+                    <div class="text-4xl">${item.icon}</div>
+                    <div>
+                        <p class="font-black text-xs text-slate-800">${item.name}</p>
+                        <p class="text-[8px] text-slate-400 font-bold mt-0.5">${item.desc}</p>
                     </div>
-                    <div class="space-y-3 pt-2">
-                        <button onclick="handleSaveSub()" class="w-full btn-primary py-5">確認新增</button>
-                        <button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button>
+                    <p class="text-xs font-black text-slate-900 bg-slate-50 px-2 py-0.5 rounded-lg inline-block">${fp} P</p>
+                    <button onclick="confirmPurchase('${item.name}', ${fp})" class="w-full btn-primary py-2 text-[10px]">兌換</button>
+                </div>`;
+            }).join('');
+        }
+        function confirmPurchase(n, c) { if (userStats.points < c) return showToast(`點數不足`); showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🛍️</div><h3 class="text-xl font-black">兌換確認</h3><p class="text-sm font-bold">消耗 ${c} P 兌換「${n}」？</p><div class="space-y-3"><button onclick="executePurchase('${n}', ${c})" class="w-full btn-primary py-5 shadow-xl">確定兌換</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); }
+        function executePurchase(n, c) { 
+            userStats.points -= c;
+            if (n === '連擊護身符') {
+                userStats.streakShield++;
+                showToast(`護身符已存入帳號 🛡️`);
+            } else {
+                const v = { id: Date.now(), name: n, date: new Date().toLocaleDateString() };
+                userStats.inventory.unshift(v);
+            }
+            saveStats(); updatePointsUI(); updateRewardList(); renderMall(); closeModal();
+        }
+
+        // --- 刪除紀錄邏輯 (徹底修復) ---
+        function confirmDelete(id) {
+            showModalContent(`
+                <div class="text-center space-y-6 py-2">
+                    <div class="text-6xl">🗑️</div>
+                    <div class="space-y-1">
+                        <h3 class="text-xl font-black text-slate-800">確定刪除嗎？</h3>
+                        <p class="text-sm text-slate-500 font-bold">紀錄移除後點數不會退還喔。</p>
+                    </div>
+                    <div class="space-y-3">
+                        <button onclick="executeDelete(${id})" class="w-full btn-primary bg-red-600 py-5 shadow-xl">確定移除</button>
+                        <button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消返回</button>
                     </div>
                 </div>
             `);
         }
-        function handleSaveSub() {
-            const n = document.getElementById('subName').value;
-            const a = parseFloat(document.getElementById('subAmount').value);
-            if (!n || isNaN(a)) { showToast('請填寫完整資訊'); return; }
-            userStats.subscriptions.push({ id: Date.now(), name: n, amount: a });
-            saveStats(); renderSubscriptions(); closeModal(); showToast('訂閱已追蹤');
+        function executeDelete(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveData();
+            updateHistory();
+            updateDashboard();
+            closeModal();
+            showToast('已成功移除紀錄');
         }
+
+        // --- 其他系統功能 ---
         function renderSubscriptions() {
             const list = document.getElementById('subList'); if(!list) return;
             const total = userStats.subscriptions.reduce((sum, s) => sum + s.amount, 0);
@@ -399,28 +483,6 @@
         }
         function deleteSub(id) { userStats.subscriptions = userStats.subscriptions.filter(s => s.id !== id); saveStats(); renderSubscriptions(); }
 
-        function openAddDreamModal() {
-            showModalContent(`
-                <div class="space-y-6">
-                    <h3 class="text-xl font-black text-center">新增夢想目標</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="dreamTitle" placeholder="夢想名稱" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
-                        <input type="number" id="dreamTarget" placeholder="目標金額" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
-                    </div>
-                    <div class="space-y-3 pt-2">
-                        <button onclick="handleSaveDream()" class="w-full btn-primary py-5">確認啟動</button>
-                        <button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button>
-                    </div>
-                </div>
-            `);
-        }
-        function handleSaveDream() {
-            const t = document.getElementById('dreamTitle').value;
-            const g = parseFloat(document.getElementById('dreamTarget').value);
-            if (!t || isNaN(g)) { showToast('請填寫完整資訊'); return; }
-            userStats.dreams.push({ id: Date.now(), title: t, target: g, current: 0 });
-            saveStats(); renderDreams(); closeModal(); showToast('夢想已啟動 ✨');
-        }
         function renderDreams() {
             const container = document.getElementById('dreamContainer'); if (!container) return;
             if (userStats.dreams.length === 0) { container.innerHTML = `<div class="bg-white p-8 rounded-[2rem] border border-dashed border-slate-200 text-center opacity-60"><p class="text-[11px] font-bold">尚未設定目標</p></div>`; return; }
@@ -438,18 +500,6 @@
                 </div>`;
             }).join('');
         }
-        function openAllocateModal(id) {
-            const d = userStats.dreams.find(item => item.id === id);
-            showModalContent(`<div class="space-y-6 text-center"><h3 class="text-xl font-black">存入「${d.title}」</h3><input type="number" id="allocAmount" placeholder="0" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl font-black border-none outline-none"><div class="space-y-3 pt-4"><button onclick="handleAllocate(${id})" class="w-full btn-primary py-5">確認撥入</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`);
-            setTimeout(() => document.getElementById('allocAmount').focus(), 400);
-        }
-        function handleAllocate(id) {
-            const a = parseFloat(document.getElementById('allocAmount').value); if (isNaN(a) || a <= 0) return showToast('金額錯誤');
-            const idx = userStats.dreams.findIndex(d => d.id === id); userStats.dreams[idx].current += a; saveStats(); renderDreams(); closeModal();
-            if (userStats.dreams[idx].current >= userStats.dreams[idx].target) { 
-                showModalContent(`<div class="business-card text-center shadow-2xl"><div class="w-12 h-12 bg-white/10 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4">御</div><h2 class="text-4xl font-black">夢想達成</h2><p class="mt-4 text-xl font-bold">「${userStats.dreams[idx].title}」</p><button onclick="closeModal()" class="mt-8 bg-white text-slate-900 px-8 py-4 rounded-full font-black">太棒了</button></div>`); 
-            } else { showToast(`撥入 $${a}`); }
-        }
 
         function navigateTo(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
@@ -457,7 +507,7 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             const nav = document.getElementById(`nav-${id}`); if (nav) nav.classList.add('active');
             if (id === 'add') resetForm();
-            if (id === 'dashboard') { updateDashboard(); renderDreams(); refreshTip(); }
+            if (id === 'dashboard') { updateDashboard(); renderDreams(); }
             if (id === 'history') updateHistory(); 
             if (id === 'subscriptions') renderSubscriptions();
             if (id === 'mall') { renderMall(); updateRewardList(); }
@@ -468,12 +518,9 @@
             const now = new Date(); const currM = now.toISOString().substring(0, 7);
             let income = 0, expense = 0; const sum = {};
             transactions.forEach(t => { if (t.date.substring(0, 7) === currM) { if (t.type === 'income') income += t.amount; else { expense += t.amount; sum[t.category] = (sum[t.category] || 0) + t.amount; } } });
-            const netCashflow = document.getElementById('netCashflow');
-            const totalIncome = document.getElementById('totalIncome');
-            const totalExpense = document.getElementById('totalExpense');
-            if(netCashflow) netCashflow.innerText = `$ ${(income - expense).toLocaleString()}`;
-            if(totalIncome) totalIncome.innerText = `$ ${income.toLocaleString()}`;
-            if(totalExpense) totalExpense.innerText = `$ ${expense.toLocaleString()}`;
+            document.getElementById('netCashflow').innerText = `$ ${(income - expense).toLocaleString()}`;
+            document.getElementById('totalIncome').innerText = `$ ${income.toLocaleString()}`;
+            document.getElementById('totalExpense').innerText = `$ ${expense.toLocaleString()}`;
             const recent = [...transactions].sort((a,b) => (b.date !== a.date) ? new Date(b.date) - new Date(a.date) : b.id - a.id).slice(0, 3);
             const h = document.getElementById('quickHistory');
             if(h) h.innerHTML = recent.map(t => `<div class="bg-white p-5 rounded-3xl flex justify-between items-center text-xs shadow-sm border border-slate-50"><div class="flex items-center space-x-4"><span class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center font-black">${t.type==='income'?'💰':'🛒'}</span><p class="font-bold">${t.category}</p></div><p class="font-black ${t.type==='income'?'text-green-500':'text-slate-900'}">$${t.amount.toLocaleString()}</p></div>`).join('') || '<p class="text-center py-10 opacity-30">尚無紀錄</p>';
@@ -490,32 +537,21 @@
             }).join('') || '<p class="text-center py-20 opacity-30 italic">No Records</p>';
         }
 
-        function renderMall() {
-            const lv = getLevelInfo(userStats.streak); const c = document.getElementById('mallItems'); const i = document.getElementById('mallDiscountInfo');
-            if(i) i.innerText = `會員等級：${lv.name} (${(lv.discount * 10).toFixed(1)} 折)`;
-            if(!c) return;
-            c.innerHTML = mallItems.map(item => {
-                const fp = Math.floor(item.price * lv.discount);
-                return `<div class="bg-white p-5 rounded-3xl text-center space-y-4 shadow-sm active:scale-95 transition-transform"><div class="text-4xl">${item.icon}</div><p class="font-black text-xs">${item.name}</p><p class="text-xs font-black text-slate-900 bg-slate-50 px-2 py-0.5 rounded-lg">${fp} P</p><button onclick="confirmPurchase('${item.name}', ${fp})" class="w-full btn-primary py-2 text-[10px]">兌換</button></div>`;
-            }).join('');
+        function incrementStreak() {
+            const td = new Date().toISOString().split('T')[0]; if (userStats.lastEntryDate === td) return;
+            if (userStats.lastEntryDate) { const diff = Math.floor((new Date(td) - new Date(userStats.lastEntryDate)) / (1000 * 60 * 60 * 24)); if (diff === 1) userStats.streak += 1; else userStats.streak = 1; } else userStats.streak = 1;
+            userStats.lastEntryDate = td; saveStats(); updatePointsUI();
         }
-        function confirmPurchase(n, c) { if (userStats.points < c) return showToast(`點數不足`); showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🛍️</div><h3 class="text-xl font-black">兌換確認</h3><p class="text-sm font-bold">消耗 ${c} P 兌換？</p><div class="space-y-3"><button onclick="executePurchase('${n}', ${c})" class="w-full btn-primary py-5">確定兌換</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); }
-        function executePurchase(n, c) { userStats.points -= c; const v = { id: Date.now(), name: n, date: new Date().toLocaleDateString() }; userStats.inventory.unshift(v); saveStats(); updatePointsUI(); updateRewardList(); showVoucher(v); }
-        function showVoucher(v) { showModalContent(`<div class="text-center space-y-6"><div class="text-green-500 text-xl font-black">🎉 兌換成功</div><div class="coupon-card p-8 rounded-[2rem] text-left border-2 border-slate-900 shadow-xl"><h4 class="text-lg font-black">${v.name}</h4><div class="py-4 text-blue-600 font-black text-lg uppercase tracking-wider">已授權兌換</div><p class="text-[9px] text-slate-400 font-bold">${v.date} | 御謙團隊 認證</p></div><div class="space-y-3"><button onclick="confirmRedeem(${v.id})" class="w-full py-4 bg-red-50 text-red-600 font-black rounded-2xl text-[10px]">顧問核銷</button><button onclick="closeModal()" class="w-full btn-primary py-5 text-sm">關閉</button></div></div>`); }
-        function confirmRedeem(id) { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🔐</div><h3 class="text-xl font-black">管理員核銷</h3><input type="password" id="redeemPwd" placeholder="••••" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl tracking-[0.8em] font-black border-none outline-none"><div class="space-y-3"><button onclick="handleSecureRedeem(${id})" class="w-full btn-primary py-5">確認核銷</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">返回</button></div></div>`); setTimeout(() => document.getElementById('redeemPwd').focus(), 400); }
-        function handleSecureRedeem(id) { if (document.getElementById('redeemPwd').value === CONSULTANT_PWD) { userStats.inventory = userStats.inventory.filter(v => v.id !== id); saveStats(); updateRewardList(); closeModal(); showToast('憑證已核銷'); } else showToast('密碼錯誤'); }
-
-        function getLevelInfo(s) { if (s >= 60) return { name: '資產大師', next: 999, discount: 0.85, color: '#8b5cf6' }; if (s >= 21) return { name: '收支職人', next: 60, discount: 0.9, color: '#3b82f6' }; if (s >= 7) return { name: '財務學徒', next: 21, discount: 0.95, color: '#10b981' }; return { name: '初心學員', next: 7, discount: 1, color: '#94a3b8' }; }
-        function incrementStreak() { const td = new Date().toISOString().split('T')[0]; if (userStats.lastEntryDate === td) return; if (userStats.lastEntryDate) { const diff = Math.floor((new Date(td) - new Date(userStats.lastEntryDate)) / (1000 * 60 * 60 * 24)); if (diff === 1) userStats.streak += 1; else userStats.streak = 1; } else userStats.streak = 1; userStats.lastEntryDate = td; saveStats(); updatePointsUI(); }
         
         function updatePointsUI() { 
             const hp = document.getElementById('headerPoints'); const sc = document.getElementById('streakCount');
-            if(hp) hp.innerText = userStats.points; if(sc) sc.innerText = userStats.streak;
+            const sh = document.getElementById('shieldCount');
+            if(hp) hp.innerText = userStats.points; 
+            if(sc) sc.innerText = userStats.streak;
+            if(sh) sh.innerText = userStats.streakShield;
             const lv = getLevelInfo(userStats.streak); const ln = document.getElementById('levelName');
-            const ld = document.getElementById('levelDiscount');
-            const lp = document.getElementById('levelProgress');
-            if(ln) ln.innerText = lv.name; 
-            if(ld) ld.innerText = lv.discount < 1 ? `專屬 ${(lv.discount * 100).toFixed(0)} 折` : '無折扣';
+            const ld = document.getElementById('levelDiscount'); const lp = document.getElementById('levelProgress');
+            if(ln) ln.innerText = lv.name; if(ld) ld.innerText = lv.discount < 1 ? `專屬 ${(lv.discount * 100).toFixed(0)} 折` : '無折扣';
             if(lp) { lp.style.width = (lv.next === 999 ? 100 : (userStats.streak / lv.next) * 100) + '%'; lp.style.backgroundColor = lv.color; }
         }
 
@@ -540,24 +576,24 @@
 
         function resetForm() { 
             const form = document.getElementById('transactionForm'); if(form) form.reset();
-            const editId = document.getElementById('editId'); if(editId) editId.value = ""; 
-            const addPageTitle = document.getElementById('addPageTitle'); if(addPageTitle) addPageTitle.innerText = "新增財務紀錄";
-            const submitBtn = document.getElementById('submitBtn'); if(submitBtn) submitBtn.innerText = "完成存入 (獎勵 +5P)";
-            const date = document.getElementById('date'); if(date) date.valueAsDate = new Date(); 
+            document.getElementById('editId').value = ""; 
+            document.getElementById('addPageTitle').innerText = "新增財務紀錄";
+            document.getElementById('submitBtn').innerText = "完成存入 (獎勵 +5P)";
+            document.getElementById('date').valueAsDate = new Date(); 
             setType('expense'); 
         }
 
         function editEntry(id) { 
             const t = transactions.find(i => i.id === id); if (!t) return; 
             navigateTo('add'); 
-            const editId = document.getElementById('editId'); if(editId) editId.value = t.id; 
-            const addPageTitle = document.getElementById('addPageTitle'); if(addPageTitle) addPageTitle.innerText = "編輯數據紀錄";
-            const submitBtn = document.getElementById('submitBtn'); if(submitBtn) submitBtn.innerText = "確認修改資料";
-            const amount = document.getElementById('amount'); if(amount) amount.value = t.amount; 
-            const date = document.getElementById('date'); if(date) date.value = t.date; 
-            const note = document.getElementById('note'); if(note) note.value = t.note; 
+            document.getElementById('editId').value = t.id; 
+            document.getElementById('addPageTitle').innerText = "編輯數據紀錄";
+            document.getElementById('submitBtn').innerText = "確認修改資料";
+            document.getElementById('amount').value = t.amount; 
+            document.getElementById('date').value = t.date; 
+            document.getElementById('note').value = t.note; 
             setType(t.type); 
-            const category = document.getElementById('category'); if(category) category.value = t.category; 
+            document.getElementById('category').value = t.category; 
         }
 
         function handleConsultClick() {
@@ -579,11 +615,21 @@
             `);
         }
 
-        function handleUseVoucherOption() { const v = userStats.inventory.filter(v => v.name.includes('服務') || v.name.includes('諮詢')); if (v.length > 0) showVoucher(v[0]); else showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-5xl text-slate-900">🎫</div><h3 class="text-xl font-black">尚未持有憑證</h3><button onclick="navigateTo('mall'); closeModal();" class="w-full btn-primary py-5 rounded-[2rem]">前往商城</button></div>`); }
+        function handleUseVoucherOption() { const v = userStats.inventory.filter(v => v.name.includes('服務') || v.name.includes('諮詢')); if (v.length > 0) showVoucher(v[0]); else showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-5xl">🎫</div><h3 class="text-xl font-black">尚未持有憑證</h3><button onclick="navigateTo('mall'); closeModal();" class="w-full btn-primary py-5 rounded-[2rem]">前往商城</button></div>`); }
+        function showVoucher(v) { showModalContent(`<div class="text-center space-y-6"><div class="text-green-500 text-xl font-black">🎉 憑證有效</div><div class="coupon-card p-8 rounded-[2rem] text-left border-2 border-slate-900 shadow-xl"><h4 class="text-lg font-black">${v.name}</h4><div class="py-4 text-blue-600 font-black text-lg uppercase tracking-wider">已授權兌換</div><p class="text-[9px] text-slate-400 font-bold">${v.date} | 御謙團隊 認證</p></div><div class="space-y-3"><button onclick="confirmRedeem(${v.id})" class="w-full py-4 bg-red-50 text-red-600 font-black rounded-2xl text-[10px]">顧問核銷</button><button onclick="closeModal()" class="w-full btn-primary py-5 text-sm">關閉</button></div></div>`); }
+        function confirmRedeem(id) { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🔐</div><h3 class="text-xl font-black">管理員核銷</h3><input type="password" id="redeemPwd" placeholder="••••" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl tracking-[0.8em] font-black border-none outline-none" autocomplete="new-password"><div class="space-y-3"><button onclick="handleSecureRedeem(${id})" class="w-full btn-primary py-5 shadow-xl">確認核銷</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">返回</button></div></div>`); setTimeout(() => document.getElementById('redeemPwd').focus(), 400); }
+        function handleSecureRedeem(id) { if (document.getElementById('redeemPwd').value === CONSULTANT_PWD) { userStats.inventory = userStats.inventory.filter(v => v.id !== id); saveStats(); updateRewardList(); closeModal(); showToast('憑證已核銷'); } else showToast('密碼錯誤'); }
+        function getLevelInfo(s) { if (s >= 60) return { name: '資產大師', next: 999, discount: 0.85, color: '#8b5cf6' }; if (s >= 21) return { name: '收支職人', next: 60, discount: 0.9, color: '#3b82f6' }; if (s >= 7) return { name: '財務學徒', next: 21, discount: 0.95, color: '#10b981' }; return { name: '初心學員', next: 7, discount: 1, color: '#94a3b8' }; }
         function confirmReset() { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-red-500">⚠️</div><h3 class="text-xl font-black">全部重置？</h3><div class="space-y-3"><button onclick="localStorage.clear(); location.reload();" class="w-full btn-primary bg-red-600 py-5">確認清空</button><button onclick="closeModal()" class="w-full btn-secondary py-4">取消</button></div></div>`); }
-        function updateRewardList() { const list = document.getElementById('rewardList'); if (!list) return; if (!userStats.inventory.length) { list.innerHTML = '<p class="text-center py-10 opacity-30">無憑證</p>'; return; } list.innerHTML = userStats.inventory.map(v => `<div class="bg-white p-6 rounded-[2.2rem] flex justify-between items-center shadow-md active:scale-95 transition-all border border-slate-50" onclick='showVoucher(${JSON.stringify(v)})'><div><p class="font-black text-sm">${v.name}</p><p class="text-[9px] text-blue-500 font-bold mt-1 uppercase">點擊使用</p></div><span class="text-[10px] bg-slate-900 text-white px-4 py-2 rounded-xl font-black">核銷</span></div>`).join(''); }
+        function updateRewardList() { const list = document.getElementById('rewardList'); if (!list) return; if (!userStats.inventory.length) { list.innerHTML = '<p class="text-center py-10 opacity-30">無憑證</p>'; return; } list.innerHTML = userStats.inventory.map(v => `<div class="bg-white p-6 rounded-[2.2rem] flex justify-between items-center shadow-md active:scale-95 transition-all border border-slate-50" onclick='showVoucher(${JSON.stringify(v)})'><div><p class="font-black text-sm">${v.name}</p><p class="text-[9px] text-blue-500 font-bold mt-1 uppercase">點擊使用</p></div><span class="text-[10px] bg-slate-900 text-white px-4 py-2 rounded-xl font-black">管理</span></div>`).join(''); }
+        function openAllocateModal(id) { const d = userStats.dreams.find(item => item.id === id); showModalContent(`<div class="space-y-6 text-center"><h3 class="text-xl font-black">存入「${d.title}」</h3><input type="number" id="allocAmount" placeholder="0" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl font-black border-none outline-none"><div class="space-y-3 pt-4"><button onclick="handleAllocate(${id})" class="w-full btn-primary py-5">確認撥入</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); setTimeout(() => document.getElementById('allocAmount').focus(), 400); }
+        function handleAllocate(id) { const a = parseFloat(document.getElementById('allocAmount').value); if (isNaN(a) || a <= 0) return showToast('金額錯誤'); const idx = userStats.dreams.findIndex(d => d.id === id); userStats.dreams[idx].current += a; saveStats(); renderDreams(); closeModal(); if (userStats.dreams[idx].current >= userStats.dreams[idx].target) { showModalContent(`<div class="business-card text-center shadow-2xl"><div class="w-12 h-12 bg-white/10 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4">御</div><h2 class="text-4xl font-black">夢想達成</h2><p class="mt-4 text-xl font-bold">「${userStats.dreams[idx].title}」</p><button onclick="closeModal()" class="mt-8 bg-white text-slate-900 py-4 rounded-full font-black">太棒了</button></div>`); } else { showToast(`撥入 $${a}`); } }
 
-        window.onload = () => { setType('expense'); navigateTo('dashboard'); };
+        window.onload = () => { 
+            checkStreakExpiry();
+            setType('expense'); 
+            navigateTo('dashboard'); 
+        };
     </script>
 </body>
 </html>
