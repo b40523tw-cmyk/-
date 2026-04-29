@@ -157,7 +157,7 @@
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <div class="shield-badge text-white px-2 py-1 rounded-full text-[10px] font-black flex items-center shadow-sm">
+            <div class="shield-badge text-white px-2 py-1 rounded-full text-[10px] font-black flex items-center shadow-sm" title="連擊護身符">
                 🛡️ <span id="shieldCount">0</span>
             </div>
             <div class="streak-badge text-white px-2.5 py-1 rounded-full text-[10px] font-black flex items-center shadow-sm">
@@ -180,14 +180,14 @@
             
             <!-- 1. 總覽分頁 -->
             <section id="page-dashboard" class="page active space-y-6">
-                <!-- 安娜姨姨的小提醒 (隨機理財知識) -->
+                <!-- 安娜姨姨的小提醒 -->
                 <div id="advisorTip" class="bg-slate-900 p-5 rounded-[2rem] text-white shadow-lg space-y-2 active:scale-95 transition-transform" onclick="refreshTip()">
                     <div class="flex items-center space-x-2">
                         <span class="text-lg">💡</span>
                         <span class="text-xs font-black tracking-widest uppercase opacity-80">安娜姨姨的理財小知識</span>
                     </div>
                     <p id="tipText" class="text-sm font-bold leading-relaxed">載入小知識中...</p>
-                    <p class="text-[8px] text-white/30 text-right uppercase tracking-tighter">點擊卡片換一則</p>
+                    <p class="text-[8px] text-white/30 text-right uppercase tracking-tighter">點擊換一則</p>
                 </div>
 
                 <!-- 等級卡 -->
@@ -197,9 +197,9 @@
                         <p class="text-[10px] text-slate-900 font-black" id="levelDiscount">無折扣</p>
                     </div>
                     <div class="level-progress-bg"><div id="levelProgress" class="level-progress-fill" style="width: 0%"></div></div>
-                    <p class="text-[9px] text-slate-400 font-bold text-center" id="levelHint">開始記帳以累積等級</p>
                 </div>
 
+                <!-- 夢想進度 -->
                 <div class="space-y-4">
                     <div class="flex justify-between items-center px-1">
                         <h3 class="text-slate-800 font-black text-xs uppercase tracking-widest">我的夢想儲蓄</h3>
@@ -208,6 +208,7 @@
                     <div id="dreamContainer" class="space-y-3"></div>
                 </div>
 
+                <!-- 收支卡片 -->
                 <div class="bg-slate-900 text-white p-7 rounded-[2.25rem] shadow-2xl relative overflow-hidden">
                     <div class="relative z-10">
                         <p class="text-slate-500 text-[10px] mb-1 font-bold uppercase tracking-widest">本月結餘預估</p>
@@ -220,7 +221,7 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm">
-                    <h3 class="text-slate-800 font-bold text-xs mb-4 opacity-50 uppercase tracking-widest text-center">消費佔比分析</h3>
+                    <h3 class="text-slate-800 font-bold text-xs mb-4 opacity-50 uppercase tracking-widest text-center">收支分配比例</h3>
                     <div class="h-40"><canvas id="financeChart"></canvas></div>
                 </div>
 
@@ -233,15 +234,16 @@
                 </div>
             </section>
 
-            <!-- 2. 訂閱追蹤分頁 -->
+            <!-- 2. 固定開銷分頁 -->
             <section id="page-subscriptions" class="page space-y-6">
                 <div class="flex justify-between items-center px-1">
-                    <h2 class="text-2xl font-black text-slate-800">每月固定開銷追蹤</h2>
-                    <button onclick="openAddSubModal()" class="text-[10px] bg-slate-900 text-white px-3 py-1.5 rounded-xl font-black">+ 新增</button>
+                    <h2 class="text-2xl font-black text-slate-800">每月固定開銷</h2>
+                    <button onclick="openAddSubModal()" class="text-[10px] bg-slate-900 text-white px-3 py-1.5 rounded-xl font-black">+ 新增開銷</button>
                 </div>
                 <div class="bg-amber-50 border border-amber-100 p-5 rounded-[2rem] space-y-2">
-                    <p class="text-[10px] text-amber-700 font-black uppercase tracking-widest">每月固定支出</p>
+                    <p class="text-[10px] text-amber-700 font-black uppercase tracking-widest">每月自動入帳總額</p>
                     <h3 id="totalSubAmount" class="text-3xl font-black text-amber-900">$ 0</h3>
+                    <p class="text-[9px] text-amber-600/60 font-bold leading-relaxed">設定日期後，每月當天打開 App 將自動幫您記帳。</p>
                 </div>
                 <div id="subList" class="space-y-3"></div>
             </section>
@@ -261,7 +263,6 @@
                     <h2 class="text-2xl font-black text-slate-800">集點商城</h2>
                     <p class="text-slate-400 text-[10px] font-bold uppercase mt-1" id="mallDiscountInfo">計算折扣中...</p>
                 </div>
-                <!-- 護身符商品將會渲染在此 -->
                 <div class="grid grid-cols-2 gap-4" id="mallItems"></div>
                 <div class="mt-10 px-1">
                     <h3 class="text-xs font-bold text-slate-400 mb-4 px-1 uppercase tracking-widest">🎫 我的憑證票夾</h3>
@@ -323,7 +324,7 @@
     <script>
         // --- 核心變數 ---
         let chartInstance = null; let currentType = 'expense'; const CONSULTANT_PWD = '0000';
-        const DATA_KEY = 'yutrend_anna_clean_v26_data'; const STATS_KEY = 'yutrend_anna_clean_v26_stats';
+        const DATA_KEY = 'yutrend_anna_clean_v27_data'; const STATS_KEY = 'yutrend_anna_clean_v27_stats';
 
         const financialTips = [
             "記帳是了解金錢流向的第一步，看清開銷才能拿回生活主導權。",
@@ -343,21 +344,20 @@
             if (tipEl) tipEl.innerText = financialTips[Math.floor(Math.random() * financialTips.length)];
         }
 
-        // --- 資料遷移與初始化 ---
+        // --- 資料遷移 ---
         function migrateData() {
-            const oldKeys = ['yutrend_anna_clean_v25_data', 'yutrend_anna_final_v24_data'];
+            const oldKeys = ['yutrend_anna_clean_v26_data', 'yutrend_anna_clean_v25_data'];
             if (!localStorage.getItem(DATA_KEY)) { for (let k of oldKeys) { let d = localStorage.getItem(k); if (d) { localStorage.setItem(DATA_KEY, d); break; } } }
-            const oldStatsKeys = ['yutrend_anna_clean_v25_stats', 'yutrend_anna_final_v24_stats'];
+            const oldStatsKeys = ['yutrend_anna_clean_v26_stats', 'yutrend_anna_clean_v25_stats'];
             if (!localStorage.getItem(STATS_KEY)) { for (let k of oldStatsKeys) { let s = localStorage.getItem(k); if (s) { localStorage.setItem(STATS_KEY, s); break; } } }
         }
         migrateData();
 
         let transactions = JSON.parse(localStorage.getItem(DATA_KEY)) || [];
         let userStats = JSON.parse(localStorage.getItem(STATS_KEY)) || { 
-            points: 0, lastDaily: null, inventory: [], streak: 0, lastEntryDate: null, dreams: [], subscriptions: [], streakShield: 0
+            points: 0, lastDaily: null, inventory: [], streak: 0, lastEntryDate: null, dreams: [], subscriptions: [], streakShield: 0, lastAutoCheck: null
         };
         
-        // 補齊可能缺失的欄位
         if (userStats.streakShield === undefined) userStats.streakShield = 0;
         if (!userStats.dreams) userStats.dreams = [];
         if (!userStats.subscriptions) userStats.subscriptions = [];
@@ -368,42 +368,77 @@
         };
 
         const mallItems = [
-            { id: 1, name: '連擊護身符', price: 30, icon: '🛡️', desc: '自動消耗以挽救斷掉的連擊紀錄' },
-            { id: 2, name: '精選咖啡', price: 50, icon: '☕', desc: '安娜請你喝一杯提神咖啡' },
+            { id: 1, name: '連擊護身符', price: 30, icon: '🛡️', desc: '斷掉紀錄時自動扣除挽救' },
+            { id: 2, name: '精選咖啡', price: 50, icon: '☕', desc: '安娜請你喝一杯咖啡' },
             { id: 3, name: '理財規劃手冊', price: 100, icon: '📚', desc: '御謙團隊專業實體規劃書' },
-            { id: 4, name: '1-ON-1 專業服務', price: 1000, icon: '💎', desc: '與安娜姨姨進行一小時諮詢' }
+            { id: 4, name: '1-ON-1 專業服務', price: 1000, icon: '💎', desc: '與安娜姨姨進行專業諮詢' }
         ];
 
-        // --- 護身符邏輯 ---
+        // --- 自動化固定開銷邏輯 ---
+        function checkRecurringExpenses() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            const currentMonth = today.getMonth() + 1; // 1-12
+            const currentYear = today.getFullYear();
+            
+            let addedCount = 0;
+            let addedNames = [];
+
+            userStats.subscriptions.forEach(sub => {
+                // 檢查這筆訂閱在這個月是否已經入帳
+                const recordKey = `recurring_${sub.id}_${currentYear}_${currentMonth}`;
+                
+                // 如果今天日期大於或等於設定的扣款日，且這個月還沒記錄過
+                if (today.getDate() >= sub.day && !localStorage.getItem(recordKey)) {
+                    const newTransaction = {
+                        id: Date.now() + Math.random(),
+                        type: 'expense',
+                        amount: sub.amount,
+                        category: '生活雜項',
+                        date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(sub.day).padStart(2, '0')}`,
+                        note: `[自動入帳] ${sub.name}`,
+                        isRecurring: true
+                    };
+                    transactions.push(newTransaction);
+                    localStorage.setItem(recordKey, "done");
+                    addedCount++;
+                    addedNames.push(sub.name);
+                }
+            });
+
+            if (addedCount > 0) {
+                saveData();
+                showModalContent(`
+                    <div class="text-center space-y-5 py-2">
+                        <div class="text-6xl">🗓️</div>
+                        <div class="space-y-1">
+                            <h3 class="text-xl font-black text-slate-800">安娜姨姨代勞入帳！</h3>
+                            <p class="text-sm text-slate-500 font-bold px-6 leading-relaxed">
+                                發現今日有 <span class="text-blue-600">${addedCount}</span> 筆固定開銷已過期：<br>
+                                <span class="text-slate-900">${addedNames.join(', ')}</span><br>
+                                系統已自動幫您記入支出囉！
+                            </p>
+                        </div>
+                        <button onclick="closeModal(); updateDashboard();" class="w-full btn-primary py-5 shadow-xl">太貼心了，謝謝安娜</button>
+                    </div>
+                `);
+            }
+        }
+
+        // --- 護身符救回邏輯 ---
         function checkStreakExpiry() {
             const today = new Date().toISOString().split('T')[0];
             if (userStats.lastEntryDate) {
-                const last = new Date(userStats.lastEntryDate);
-                const current = new Date(today);
-                const diff = Math.floor((current - last) / (1000 * 60 * 60 * 24));
-                
+                const diff = Math.floor((new Date(today) - new Date(userStats.lastEntryDate)) / (1000 * 60 * 60 * 24));
                 if (diff > 1) {
                     if (userStats.streakShield > 0) {
                         userStats.streakShield--;
-                        // 將日期改為昨天，模擬昨天有記帳
                         const yesterday = new Date();
                         yesterday.setDate(yesterday.getDate() - 1);
                         userStats.lastEntryDate = yesterday.toISOString().split('T')[0];
                         saveStats();
-                        showModalContent(`
-                            <div class="text-center space-y-5">
-                                <div class="text-6xl">🛡️</div>
-                                <h3 class="text-xl font-black">護身符發動！</h3>
-                                <p class="text-sm text-slate-500 font-bold px-4">
-                                    安娜姨姨發現您前幾天忘記記帳了，系統已自動消耗「護身符」為您接回 <b>${userStats.streak}</b> 天連擊紀錄！
-                                </p>
-                                <button onclick="closeModal()" class="w-full btn-primary py-4">太棒了，謝謝安娜</button>
-                            </div>
-                        `);
-                    } else {
-                        userStats.streak = 0;
-                        saveStats();
-                    }
+                        showModalContent(`<div class="text-center space-y-5"><div class="text-6xl">🛡️</div><h3 class="text-xl font-black">護身符發動！</h3><p class="text-sm text-slate-500 font-bold px-4">安娜姨姨發現您前幾天漏掉記帳了，已自動消耗護身符接回 <b>${userStats.streak}</b> 天紀錄！</p><button onclick="closeModal()" class="w-full btn-primary py-4">謝謝安娜</button></div>`);
+                    } else { userStats.streak = 0; saveStats(); }
                 }
             }
         }
@@ -416,91 +451,67 @@
         function saveStats() { localStorage.setItem(STATS_KEY, JSON.stringify(userStats)); }
         function saveData() { localStorage.setItem(DATA_KEY, JSON.stringify(transactions)); }
 
-        // --- 商城邏輯 ---
-        function renderMall() {
-            const lv = getLevelInfo(userStats.streak); const c = document.getElementById('mallItems'); const i = document.getElementById('mallDiscountInfo');
-            if(i) i.innerText = `會員等級：${lv.name} (${(lv.discount * 10).toFixed(1)} 折)`;
-            if(!c) return;
-            c.innerHTML = mallItems.map(item => {
-                const fp = Math.floor(item.price * lv.discount);
-                return `
-                <div class="bg-white p-5 rounded-3xl text-center space-y-3 shadow-sm border border-slate-50 active:scale-95 transition-transform">
-                    <div class="text-4xl">${item.icon}</div>
-                    <div>
-                        <p class="font-black text-xs text-slate-800">${item.name}</p>
-                        <p class="text-[8px] text-slate-400 font-bold mt-0.5">${item.desc}</p>
-                    </div>
-                    <p class="text-xs font-black text-slate-900 bg-slate-50 px-2 py-0.5 rounded-lg inline-block">${fp} P</p>
-                    <button onclick="confirmPurchase('${item.name}', ${fp})" class="w-full btn-primary py-2 text-[10px]">兌換</button>
-                </div>`;
-            }).join('');
-        }
-        function confirmPurchase(n, c) { if (userStats.points < c) return showToast(`點數不足`); showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🛍️</div><h3 class="text-xl font-black">兌換確認</h3><p class="text-sm font-bold">消耗 ${c} P 兌換「${n}」？</p><div class="space-y-3"><button onclick="executePurchase('${n}', ${c})" class="w-full btn-primary py-5 shadow-xl">確定兌換</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); }
-        function executePurchase(n, c) { 
-            userStats.points -= c;
-            if (n === '連擊護身符') {
-                userStats.streakShield++;
-                showToast(`護身符已存入帳號 🛡️`);
-            } else {
-                const v = { id: Date.now(), name: n, date: new Date().toLocaleDateString() };
-                userStats.inventory.unshift(v);
-            }
-            saveStats(); updatePointsUI(); updateRewardList(); renderMall(); closeModal();
-        }
-
-        // --- 刪除紀錄邏輯 (徹底修復) ---
-        function confirmDelete(id) {
+        // --- 開銷管理修復 ---
+        function openAddSubModal() {
             showModalContent(`
-                <div class="text-center space-y-6 py-2">
-                    <div class="text-6xl">🗑️</div>
-                    <div class="space-y-1">
-                        <h3 class="text-xl font-black text-slate-800">確定刪除嗎？</h3>
-                        <p class="text-sm text-slate-500 font-bold">紀錄移除後點數不會退還喔。</p>
+                <div class="space-y-6">
+                    <h3 class="text-xl font-black text-center">新增固定開銷</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="subName" placeholder="名稱 (如: 房租、電話費)" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
+                        <input type="number" id="subAmount" placeholder="每月固定金額" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold">
+                        <div class="bg-slate-50 p-5 rounded-[1.5rem] flex items-center">
+                            <span class="text-xs font-black text-slate-400 w-24">每月扣款日</span>
+                            <input type="number" id="subDay" placeholder="1-31" min="1" max="31" class="flex-1 bg-transparent text-sm font-black border-none outline-none">
+                            <span class="text-xs font-black text-slate-400">號</span>
+                        </div>
                     </div>
-                    <div class="space-y-3">
-                        <button onclick="executeDelete(${id})" class="w-full btn-primary bg-red-600 py-5 shadow-xl">確定移除</button>
-                        <button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消返回</button>
+                    <div class="space-y-3 pt-2">
+                        <button onclick="handleSaveSub()" class="w-full btn-primary py-5 shadow-lg">確認並儲存</button>
+                        <button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button>
                     </div>
                 </div>
             `);
         }
+
+        function handleSaveSub() {
+            const n = document.getElementById('subName').value;
+            const a = parseFloat(document.getElementById('subAmount').value);
+            const d = parseInt(document.getElementById('subDay').value);
+            if (!n || isNaN(a) || isNaN(d) || d < 1 || d > 31) { showToast('請填寫完整資訊 (1-31日)'); return; }
+            userStats.subscriptions.push({ id: Date.now(), name: n, amount: a, day: d });
+            saveStats(); renderSubscriptions(); checkRecurringExpenses(); closeModal(); showToast('固定開銷已建立');
+        }
+
+        function renderSubscriptions() {
+            const list = document.getElementById('subList'); if(!list) return;
+            const total = userStats.subscriptions.reduce((sum, s) => sum + s.amount, 0);
+            document.getElementById('totalSubAmount').innerText = `$ ${total.toLocaleString()}`;
+            if(userStats.subscriptions.length === 0) { list.innerHTML = `<div class="bg-white p-8 rounded-[2rem] border border-dashed border-slate-200 text-center opacity-50"><p class="text-[11px] font-bold">目前無定期支出</p></div>`; return; }
+            list.innerHTML = userStats.subscriptions.map(s => `
+                <div class="flex items-center justify-between bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-50">
+                    <div>
+                        <p class="font-black text-sm text-slate-800">${s.name}</p>
+                        <p class="text-[9px] text-blue-500 font-bold uppercase mt-0.5">每月 ${s.day} 號扣款</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <p class="font-black text-slate-800 text-sm">$${s.amount.toLocaleString()}</p>
+                        <button onclick="deleteSub(${s.id})" class="text-slate-200 active:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    </div>
+                </div>`).join('');
+        }
+        function deleteSub(id) { userStats.subscriptions = userStats.subscriptions.filter(s => s.id !== id); saveStats(); renderSubscriptions(); }
+
+        // --- 刪除紀錄邏輯 (徹底修復) ---
         function executeDelete(id) {
             transactions = transactions.filter(t => t.id !== id);
             saveData();
             updateHistory();
             updateDashboard();
             closeModal();
-            showToast('已成功移除紀錄');
+            showToast('已移除該筆紀錄');
         }
 
-        // --- 其他系統功能 ---
-        function renderSubscriptions() {
-            const list = document.getElementById('subList'); if(!list) return;
-            const total = userStats.subscriptions.reduce((sum, s) => sum + s.amount, 0);
-            const totalEl = document.getElementById('totalSubAmount'); if(totalEl) totalEl.innerText = `$ ${total.toLocaleString()}`;
-            if(userStats.subscriptions.length === 0) { list.innerHTML = `<div class="bg-white p-8 rounded-[2rem] border border-dashed border-slate-200 text-center opacity-50"><p class="text-[11px] font-bold">目前無定期支出</p></div>`; return; }
-            list.innerHTML = userStats.subscriptions.map(s => `<div class="flex items-center justify-between bg-white p-5 rounded-[1.5rem] shadow-sm"><div><p class="font-black text-sm">${s.name}</p></div><div class="flex items-center space-x-3"><p class="font-black text-slate-800 text-sm">$${s.amount.toLocaleString()}</p><button onclick="deleteSub(${s.id})" class="text-slate-200 active:text-red-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div></div>`).join('');
-        }
-        function deleteSub(id) { userStats.subscriptions = userStats.subscriptions.filter(s => s.id !== id); saveStats(); renderSubscriptions(); }
-
-        function renderDreams() {
-            const container = document.getElementById('dreamContainer'); if (!container) return;
-            if (userStats.dreams.length === 0) { container.innerHTML = `<div class="bg-white p-8 rounded-[2rem] border border-dashed border-slate-200 text-center opacity-60"><p class="text-[11px] font-bold">尚未設定目標</p></div>`; return; }
-            container.innerHTML = userStats.dreams.map(d => {
-                const p = Math.min(Math.floor((d.current / d.target) * 100), 100);
-                return `<div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <div><p class="text-sm font-black">${d.title}</p><p class="text-[10px] text-slate-400">$${d.current.toLocaleString()} / $${d.target.toLocaleString()}</p></div>
-                        <div class="flex space-x-2">
-                            <button onclick="openAllocateModal(${d.id})" class="bg-slate-900 text-white px-3 py-1 rounded-xl text-[9px] font-black">存入</button>
-                            <button onclick="userStats.dreams = userStats.dreams.filter(item => item.id !== ${d.id}); saveStats(); renderDreams();" class="text-slate-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-                        </div>
-                    </div>
-                    <div class="dream-progress-bg"><div class="dream-progress-fill" style="width: ${p}%"></div></div>
-                </div>`;
-            }).join('');
-        }
-
+        // --- 核心系統邏輯 ---
         function navigateTo(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
             const target = document.getElementById(`page-${id}`); if(target) target.classList.add('active');
@@ -523,7 +534,7 @@
             document.getElementById('totalExpense').innerText = `$ ${expense.toLocaleString()}`;
             const recent = [...transactions].sort((a,b) => (b.date !== a.date) ? new Date(b.date) - new Date(a.date) : b.id - a.id).slice(0, 3);
             const h = document.getElementById('quickHistory');
-            if(h) h.innerHTML = recent.map(t => `<div class="bg-white p-5 rounded-3xl flex justify-between items-center text-xs shadow-sm border border-slate-50"><div class="flex items-center space-x-4"><span class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center font-black">${t.type==='income'?'💰':'🛒'}</span><p class="font-bold">${t.category}</p></div><p class="font-black ${t.type==='income'?'text-green-500':'text-slate-900'}">$${t.amount.toLocaleString()}</p></div>`).join('') || '<p class="text-center py-10 opacity-30">尚無紀錄</p>';
+            if(h) h.innerHTML = recent.map(t => `<div class="bg-white p-5 rounded-3xl flex justify-between items-center text-xs shadow-sm"><div class="flex items-center space-x-4"><span class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center font-black">${t.type==='income'?'💰':'🛒'}</span><p class="font-bold">${t.category}</p></div><p class="font-black ${t.type==='income'?'text-green-500':'text-slate-900'}">$${t.amount.toLocaleString()}</p></div>`).join('') || '<p class="text-center py-10 opacity-30">尚未記帳</p>';
             renderChart(sum); updatePointsUI(); refreshTip();
         }
 
@@ -534,76 +545,69 @@
             h.innerHTML = sortedMonths.map(m => {
                 const items = grouped[m].sort((a,b) => (b.date !== a.date) ? new Date(b.date) - new Date(a.date) : b.id - a.id);
                 return `<div class="space-y-5"><h4 class="text-[11px] font-black text-slate-400 px-2 uppercase tracking-[0.4em] mb-6">${m.replace('-', ' / ')}</h4>${items.map(t => `<div class="bg-white p-6 rounded-[2.2rem] flex justify-between items-center shadow-md border border-slate-50"><div class="flex items-center space-x-4"><span class="text-[11px] text-slate-300 font-mono font-black">${t.date.split('-')[2]}日</span><p class="font-black text-xs">${t.category}</p></div><div class="flex items-center space-x-3"><p class="font-black text-sm ${t.type==='income'?'text-green-500':'text-slate-900'}">$${t.amount.toLocaleString()}</p><div class="flex"><button onclick="editEntry(${t.id})" class="p-2 text-slate-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button onclick="confirmDelete(${t.id})" class="p-2 text-slate-200 active:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></div></div></div>`).join('')}</div>`;
-            }).join('') || '<p class="text-center py-20 opacity-30 italic">No Records</p>';
+            }).join('') || '<p class="text-center py-20 opacity-30 italic">無紀錄</p>';
         }
 
-        function incrementStreak() {
-            const td = new Date().toISOString().split('T')[0]; if (userStats.lastEntryDate === td) return;
-            if (userStats.lastEntryDate) { const diff = Math.floor((new Date(td) - new Date(userStats.lastEntryDate)) / (1000 * 60 * 60 * 24)); if (diff === 1) userStats.streak += 1; else userStats.streak = 1; } else userStats.streak = 1;
-            userStats.lastEntryDate = td; saveStats(); updatePointsUI();
+        // --- 商城渲染 ---
+        function renderMall() {
+            const lv = getLevelInfo(userStats.streak); const c = document.getElementById('mallItems'); const i = document.getElementById('mallDiscountInfo');
+            if(i) i.innerText = `會員等級：${lv.name} (${(lv.discount * 10).toFixed(1)} 折)`;
+            if(!c) return;
+            c.innerHTML = mallItems.map(item => {
+                const fp = Math.floor(item.price * lv.discount);
+                return `
+                <div class="bg-white p-5 rounded-3xl text-center space-y-3 shadow-sm border border-slate-50 active:scale-95 transition-transform">
+                    <div class="text-4xl">${item.icon}</div>
+                    <div><p class="font-black text-xs text-slate-800">${item.name}</p><p class="text-[8px] text-slate-400 font-bold mt-0.5">${item.desc}</p></div>
+                    <p class="text-xs font-black text-slate-900 bg-slate-50 px-2 py-0.5 rounded-lg inline-block">${fp} P</p>
+                    <button onclick="confirmPurchase('${item.name}', ${fp})" class="w-full btn-primary py-2 text-[10px]">兌換</button>
+                </div>`;
+            }).join('');
         }
-        
-        function updatePointsUI() { 
-            const hp = document.getElementById('headerPoints'); const sc = document.getElementById('streakCount');
-            const sh = document.getElementById('shieldCount');
-            if(hp) hp.innerText = userStats.points; 
-            if(sc) sc.innerText = userStats.streak;
-            if(sh) sh.innerText = userStats.streakShield;
-            const lv = getLevelInfo(userStats.streak); const ln = document.getElementById('levelName');
-            const ld = document.getElementById('levelDiscount'); const lp = document.getElementById('levelProgress');
-            if(ln) ln.innerText = lv.name; if(ld) ld.innerText = lv.discount < 1 ? `專屬 ${(lv.discount * 100).toFixed(0)} 折` : '無折扣';
-            if(lp) { lp.style.width = (lv.next === 999 ? 100 : (userStats.streak / lv.next) * 100) + '%'; lp.style.backgroundColor = lv.color; }
-        }
+        function confirmPurchase(n, c) { if (userStats.points < c) return showToast(`點數不足`); showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🛍️</div><h3 class="text-xl font-black">兌換確認</h3><p class="text-sm font-bold">確定要消耗 ${c} P 兌換「${n}」？</p><div class="space-y-3 pt-4"><button onclick="executePurchase('${n}', ${c})" class="w-full btn-primary py-5 shadow-xl">確定兌換</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); }
+        function executePurchase(n, c) { userStats.points -= c; if (n === '連擊護身符') { userStats.streakShield++; showToast(`護身符已存入帳號 🛡️`); } else { const v = { id: Date.now(), name: n, date: new Date().toLocaleDateString() }; userStats.inventory.unshift(v); } saveStats(); updatePointsUI(); updateRewardList(); renderMall(); closeModal(); }
 
+        // --- 夢想邏輯 ---
+        function openAddDreamModal() { showModalContent(`<div class="space-y-6 text-center"><h3 class="text-xl font-black">新增夢想目標</h3><div class="space-y-4 text-left"><input type="text" id="dreamTitle" placeholder="夢想名稱" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold"><input type="number" id="dreamTarget" placeholder="目標金額" class="w-full p-5 bg-slate-50 rounded-[1.5rem] border-none outline-none font-bold"></div><div class="space-y-3"><button onclick="handleSaveDream()" class="w-full btn-primary py-5">啟動夢想</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); }
+        function handleSaveDream() { const t = document.getElementById('dreamTitle').value; const g = parseFloat(document.getElementById('dreamTarget').value); if (!t || isNaN(g)) return; userStats.dreams.push({ id: Date.now(), title: t, target: g, current: 0 }); saveStats(); renderDreams(); closeModal(); showToast('夢想已啟動'); }
+        function renderDreams() {
+            const container = document.getElementById('dreamContainer'); if (!container) return;
+            if (userStats.dreams.length === 0) { container.innerHTML = `<div class="bg-white p-8 rounded-[2rem] border border-dashed border-slate-200 text-center opacity-60"><p class="text-[11px] font-bold">尚未設定目標</p></div>`; return; }
+            container.innerHTML = userStats.dreams.map(d => {
+                const p = Math.min(Math.floor((d.current / d.target) * 100), 100);
+                return `<div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 space-y-3">
+                    <div class="flex justify-between items-center"><div><p class="text-sm font-black text-slate-800 leading-tight">${d.title}</p><p class="text-[10px] text-slate-400 font-bold mt-1">$${d.current.toLocaleString()} / $${d.target.toLocaleString()}</p></div><div class="flex space-x-2"><button onclick="openAllocateModal(${d.id})" class="bg-slate-900 text-white px-3 py-1 rounded-xl text-[9px] font-black">存入</button><button onclick="userStats.dreams = userStats.dreams.filter(item => item.id !== ${d.id}); saveStats(); renderDreams();" class="text-slate-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>
+                    <div class="dream-progress-bg"><div class="dream-progress-fill" style="width: ${p}%"></div></div>
+                </div>`;
+            }).join('');
+        }
+        function openAllocateModal(id) { const d = userStats.dreams.find(item => item.id === id); showModalContent(`<div class="space-y-6 text-center"><h3 class="text-xl font-black">存入「${d.title}」</h3><input type="number" id="allocAmount" placeholder="0" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl font-black border-none outline-none"><div class="space-y-3 pt-4"><button onclick="handleAllocate(${id})" class="w-full btn-primary py-5">確認撥入</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); setTimeout(() => document.getElementById('allocAmount').focus(), 400); }
+        function handleAllocate(id) { const a = parseFloat(document.getElementById('allocAmount').value); if (isNaN(a) || a <= 0) return; const idx = userStats.dreams.findIndex(d => d.id === id); userStats.dreams[idx].current += a; saveStats(); renderDreams(); closeModal(); if (userStats.dreams[idx].current >= userStats.dreams[idx].target) { showModalContent(`<div class="business-card text-center shadow-2xl"><div class="w-12 h-12 bg-white/10 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4">御</div><h2 class="text-4xl font-black">夢想達成</h2><p class="mt-4 text-xl font-bold">「${userStats.dreams[idx].title}」</p><button onclick="closeModal()" class="mt-8 bg-white text-slate-900 py-4 rounded-full font-black">太棒了</button></div>`); } }
+
+        function getLevelInfo(s) { if (s >= 60) return { name: '資產大師', next: 999, discount: 0.85, color: '#8b5cf6' }; if (s >= 21) return { name: '收支職人', next: 60, discount: 0.9, color: '#3b82f6' }; if (s >= 7) return { name: '財務學徒', next: 21, discount: 0.95, color: '#10b981' }; return { name: '初心學員', next: 7, discount: 1, color: '#94a3b8' }; }
+        function incrementStreak() { const td = new Date().toISOString().split('T')[0]; if (userStats.lastEntryDate === td) return; if (userStats.lastEntryDate) { const diff = Math.floor((new Date(td) - new Date(userStats.lastEntryDate)) / (1000 * 60 * 60 * 24)); if (diff === 1) userStats.streak += 1; else userStats.streak = 1; } else userStats.streak = 1; userStats.lastEntryDate = td; saveStats(); updatePointsUI(); }
+        function updatePointsUI() { const hp = document.getElementById('headerPoints'); const sc = document.getElementById('streakCount'); const sh = document.getElementById('shieldCount'); if(hp) hp.innerText = userStats.points; if(sc) sc.innerText = userStats.streak; if(sh) sh.innerText = userStats.streakShield; const lv = getLevelInfo(userStats.streak); const ln = document.getElementById('levelName'); const ld = document.getElementById('levelDiscount'); const lp = document.getElementById('levelProgress'); if(ln) ln.innerText = lv.name; if(ld) ld.innerText = lv.discount < 1 ? `專屬 ${(lv.discount * 100).toFixed(0)} 折` : '無折扣'; if(lp) { lp.style.width = (lv.next === 999 ? 100 : (userStats.streak / lv.next) * 100) + '%'; lp.style.backgroundColor = lv.color; } }
         function renderChart(d) { const ctxEl = document.getElementById('financeChart'); if(!ctxEl) return; const ctx = ctxEl.getContext('2d'); if (chartInstance) chartInstance.destroy(); const labels = Object.keys(d); if (!labels.length) return; chartInstance = new Chart(ctx, { type: 'doughnut', data: { labels, datasets: [{ data: Object.values(d), backgroundColor: ['#0f172a', '#1e293b', '#334155', '#475569', '#64748b'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { display: false } } } }); }
         function setType(t) { currentType = t; document.getElementById('type').value = t; const eb = document.getElementById('btnExpense'); const ib = document.getElementById('btnIncome'); if(eb) eb.className = (t === 'expense') ? 'flex-1 py-4 rounded-2xl font-black text-sm bg-slate-900 text-white shadow-lg' : 'flex-1 py-4 rounded-2xl font-bold text-sm text-slate-400'; if(ib) ib.className = (t !== 'expense') ? 'flex-1 py-4 rounded-2xl font-black text-sm bg-slate-900 text-white shadow-lg' : 'flex-1 py-4 rounded-2xl font-bold text-sm text-slate-400'; const s = document.getElementById('category'); if(s) s.innerHTML = categories[currentType].map(c => `<option value="${c}">${c}</option>`).join(''); }
 
         document.getElementById('transactionForm').onsubmit = (e) => { 
             e.preventDefault(); const editId = document.getElementById('editId').value; 
             const data = { id: editId ? parseInt(editId) : Date.now(), type: document.getElementById('type').value, amount: parseFloat(document.getElementById('amount').value), category: document.getElementById('category').value, date: document.getElementById('date').value, note: document.getElementById('note').value }; 
-            if (editId) { 
-                const idx = transactions.findIndex(t => t.id === parseInt(editId)); 
-                if (idx !== -1) transactions[idx] = data; 
-                showToast('數據修改成功'); 
-            } else { 
-                transactions.push(data); 
-                incrementStreak(); 
-                const today = new Date().toISOString().split('T')[0]; 
-                if (userStats.lastDaily !== today) { userStats.lastDaily = today; userStats.points += 5; saveStats(); updatePointsUI(); showToast('簽到獎勵 +5P ✨'); } else showToast('紀錄已存入'); 
-            } 
-            saveData(); resetForm(); navigateTo('history'); 
+            if (editId) { const idx = transactions.findIndex(t => t.id === parseInt(editId)); if (idx !== -1) transactions[idx] = data; showToast('數據修改成功'); }
+            else { transactions.push(data); incrementStreak(); const today = new Date().toISOString().split('T')[0]; if (userStats.lastDaily !== today) { userStats.lastDaily = today; userStats.points += 5; saveStats(); updatePointsUI(); showToast('簽到獎勵 +5P'); } else showToast('紀錄已存入'); } saveData(); resetForm(); navigateTo('history'); 
         };
 
-        function resetForm() { 
-            const form = document.getElementById('transactionForm'); if(form) form.reset();
-            document.getElementById('editId').value = ""; 
-            document.getElementById('addPageTitle').innerText = "新增財務紀錄";
-            document.getElementById('submitBtn').innerText = "完成存入 (獎勵 +5P)";
-            document.getElementById('date').valueAsDate = new Date(); 
-            setType('expense'); 
-        }
-
-        function editEntry(id) { 
-            const t = transactions.find(i => i.id === id); if (!t) return; 
-            navigateTo('add'); 
-            document.getElementById('editId').value = t.id; 
-            document.getElementById('addPageTitle').innerText = "編輯數據紀錄";
-            document.getElementById('submitBtn').innerText = "確認修改資料";
-            document.getElementById('amount').value = t.amount; 
-            document.getElementById('date').value = t.date; 
-            document.getElementById('note').value = t.note; 
-            setType(t.type); 
-            document.getElementById('category').value = t.category; 
-        }
+        function resetForm() { document.getElementById('transactionForm').reset(); document.getElementById('editId').value = ""; document.getElementById('addPageTitle').innerText = "新增財務紀錄"; document.getElementById('submitBtn').innerText = "完成存入 (獎勵 +5P)"; document.getElementById('date').valueAsDate = new Date(); setType('expense'); }
+        function editEntry(id) { const t = transactions.find(i => i.id === id); if (!t) return; navigateTo('add'); document.getElementById('editId').value = t.id; document.getElementById('addPageTitle').innerText = "編輯數據紀錄"; document.getElementById('submitBtn').innerText = "確認修改"; document.getElementById('amount').value = t.amount; document.getElementById('date').value = t.date; document.getElementById('note').value = t.note; setType(t.type); document.getElementById('category').value = t.category; }
 
         function handleConsultClick() {
             showModalContent(`
-                <div class="business-card shadow-2xl relative overflow-hidden">
+                <div class="business-card shadow-2xl relative overflow-hidden text-left">
                     <div class="relative z-10 space-y-6">
-                        <div class="flex justify-between items-start"><div><div class="flex items-center space-x-2"><h2 class="text-2xl font-black">安娜姨姨</h2><span class="text-[10px] bg-white text-slate-900 px-2 py-0.5 rounded font-black">Anna</span></div><p class="text-[11px] text-white/70 mt-1">御謙團隊 核心顧問</p></div><div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl font-black shadow-inner">御</div></div>
-                        <div class="space-y-5 pt-5 border-t border-white/10">
-                            <div class="flex items-center space-x-4"><span class="text-white/40 text-[10px] w-12 font-black uppercase tracking-widest">Line</span><p class="font-black text-sm tracking-wide">jeff602</p></div>
-                            <div class="flex items-center space-x-4"><span class="text-white/40 text-[10px] w-12 font-black uppercase tracking-widest">IG</span><p class="font-black text-sm tracking-wide">fish_anna_ball</p></div>
+                        <div class="flex justify-between items-start"><div><div class="flex items-center space-x-2"><h2 class="text-2xl font-black text-white">安娜姨姨</h2><span class="text-[10px] bg-white text-slate-900 px-2 py-0.5 rounded font-black">Anna</span></div><p class="text-[11px] text-white/70 mt-1">御謙團隊 核心顧問</p></div><div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl font-black text-white">御</div></div>
+                        <div class="space-y-4 pt-5 border-t border-white/10">
+                            <div class="flex items-center space-x-4"><span class="text-white/40 text-[10px] w-12 font-black uppercase tracking-widest">Line</span><p class="font-black text-sm text-white">jeff602</p></div>
+                            <div class="flex items-center space-x-4"><span class="text-white/40 text-[10px] w-12 font-black uppercase tracking-widest">IG</span><p class="font-black text-sm text-white">fish_anna_ball</p></div>
                         </div>
                         <p class="text-[9px] font-bold text-white/50 tracking-[0.1em] mt-4">「人身保險業務員資格測驗合格」</p>
                     </div>
@@ -619,14 +623,14 @@
         function showVoucher(v) { showModalContent(`<div class="text-center space-y-6"><div class="text-green-500 text-xl font-black">🎉 憑證有效</div><div class="coupon-card p-8 rounded-[2rem] text-left border-2 border-slate-900 shadow-xl"><h4 class="text-lg font-black">${v.name}</h4><div class="py-4 text-blue-600 font-black text-lg uppercase tracking-wider">已授權兌換</div><p class="text-[9px] text-slate-400 font-bold">${v.date} | 御謙團隊 認證</p></div><div class="space-y-3"><button onclick="confirmRedeem(${v.id})" class="w-full py-4 bg-red-50 text-red-600 font-black rounded-2xl text-[10px]">顧問核銷</button><button onclick="closeModal()" class="w-full btn-primary py-5 text-sm">關閉</button></div></div>`); }
         function confirmRedeem(id) { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-slate-900">🔐</div><h3 class="text-xl font-black">管理員核銷</h3><input type="password" id="redeemPwd" placeholder="••••" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl tracking-[0.8em] font-black border-none outline-none" autocomplete="new-password"><div class="space-y-3"><button onclick="handleSecureRedeem(${id})" class="w-full btn-primary py-5 shadow-xl">確認核銷</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">返回</button></div></div>`); setTimeout(() => document.getElementById('redeemPwd').focus(), 400); }
         function handleSecureRedeem(id) { if (document.getElementById('redeemPwd').value === CONSULTANT_PWD) { userStats.inventory = userStats.inventory.filter(v => v.id !== id); saveStats(); updateRewardList(); closeModal(); showToast('憑證已核銷'); } else showToast('密碼錯誤'); }
-        function getLevelInfo(s) { if (s >= 60) return { name: '資產大師', next: 999, discount: 0.85, color: '#8b5cf6' }; if (s >= 21) return { name: '收支職人', next: 60, discount: 0.9, color: '#3b82f6' }; if (s >= 7) return { name: '財務學徒', next: 21, discount: 0.95, color: '#10b981' }; return { name: '初心學員', next: 7, discount: 1, color: '#94a3b8' }; }
-        function confirmReset() { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-red-500">⚠️</div><h3 class="text-xl font-black">全部重置？</h3><div class="space-y-3"><button onclick="localStorage.clear(); location.reload();" class="w-full btn-primary bg-red-600 py-5">確認清空</button><button onclick="closeModal()" class="w-full btn-secondary py-4">取消</button></div></div>`); }
-        function updateRewardList() { const list = document.getElementById('rewardList'); if (!list) return; if (!userStats.inventory.length) { list.innerHTML = '<p class="text-center py-10 opacity-30">無憑證</p>'; return; } list.innerHTML = userStats.inventory.map(v => `<div class="bg-white p-6 rounded-[2.2rem] flex justify-between items-center shadow-md active:scale-95 transition-all border border-slate-50" onclick='showVoucher(${JSON.stringify(v)})'><div><p class="font-black text-sm">${v.name}</p><p class="text-[9px] text-blue-500 font-bold mt-1 uppercase">點擊使用</p></div><span class="text-[10px] bg-slate-900 text-white px-4 py-2 rounded-xl font-black">管理</span></div>`).join(''); }
-        function openAllocateModal(id) { const d = userStats.dreams.find(item => item.id === id); showModalContent(`<div class="space-y-6 text-center"><h3 class="text-xl font-black">存入「${d.title}」</h3><input type="number" id="allocAmount" placeholder="0" class="w-full p-6 bg-slate-50 rounded-[2rem] text-center text-4xl font-black border-none outline-none"><div class="space-y-3 pt-4"><button onclick="handleAllocate(${id})" class="w-full btn-primary py-5">確認撥入</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消</button></div></div>`); setTimeout(() => document.getElementById('allocAmount').focus(), 400); }
-        function handleAllocate(id) { const a = parseFloat(document.getElementById('allocAmount').value); if (isNaN(a) || a <= 0) return showToast('金額錯誤'); const idx = userStats.dreams.findIndex(d => d.id === id); userStats.dreams[idx].current += a; saveStats(); renderDreams(); closeModal(); if (userStats.dreams[idx].current >= userStats.dreams[idx].target) { showModalContent(`<div class="business-card text-center shadow-2xl"><div class="w-12 h-12 bg-white/10 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-4">御</div><h2 class="text-4xl font-black">夢想達成</h2><p class="mt-4 text-xl font-bold">「${userStats.dreams[idx].title}」</p><button onclick="closeModal()" class="mt-8 bg-white text-slate-900 py-4 rounded-full font-black">太棒了</button></div>`); } else { showToast(`撥入 $${a}`); } }
+        function confirmDelete(id) { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-red-500">🗑️</div><h3 class="text-xl font-black">確定刪除嗎？</h3><p class="text-sm text-slate-500 font-bold px-6">移除後數據將無法恢復。</p><div class="space-y-3"><button onclick="executeDelete(${id})" class="w-full btn-primary bg-red-600 py-5 shadow-xl">確定移除</button><button onclick="closeModal()" class="w-full btn-secondary py-4 text-sm">取消返回</button></div></div>`); }
+        function confirmReset() { showModalContent(`<div class="text-center space-y-6 py-2"><div class="text-6xl text-red-500">⚠️</div><h3 class="text-xl font-black text-red-600">全部清除？</h3><div class="space-y-3"><button onclick="localStorage.clear(); location.reload();" class="w-full btn-primary bg-red-600 py-5">確認清空</button><button onclick="closeModal()" class="w-full btn-secondary py-4">取消</button></div></div>`); }
+        function updateRewardList() { const list = document.getElementById('rewardList'); if (!list) return; if (!userStats.inventory.length) { list.innerHTML = '<p class="text-center py-10 opacity-30">無憑證</p>'; return; } list.innerHTML = userStats.inventory.map(v => `<div class="bg-white p-6 rounded-[2.2rem] flex justify-between items-center shadow-md active:scale-95 transition-all border border-slate-50" onclick='showVoucher(${JSON.stringify(v)})'><div><p class="font-black text-sm">${v.name}</p><p class="text-[9px] text-blue-500 font-bold mt-1 uppercase">管理使用</p></div><span class="text-[10px] bg-slate-900 text-white px-4 py-2 rounded-xl font-black">核銷</span></div>`).join(''); }
 
+        // --- 初始化啟動 ---
         window.onload = () => { 
             checkStreakExpiry();
+            checkRecurringExpenses(); // 啟動自動入帳檢查
             setType('expense'); 
             navigateTo('dashboard'); 
         };
